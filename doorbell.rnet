@@ -1,0 +1,24 @@
+zone1
+	power: on
+	source: 3
+	volume: 50
+zone2
+	power: on
+	source: 3
+	volume: 50
+zone3:
+	power: on
+	source: 3
+	volume: 50
+zone4:
+	power: on
+	source: 3
+	volume: 50
+zone5:
+	power: on
+	source: 3
+	volume: 50
+zone6:
+	power: on
+	source: 3
+	volume: 50

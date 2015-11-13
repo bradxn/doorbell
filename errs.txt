@@ -1,0 +1,23 @@
+rnet.cpp: In member function 'void CRnetMonitor::OnReceivePacket(const BYTE*, UINT)':
+rnet.cpp:210:27: error: 'HexDump' was not declared in this scope
+rnet.cpp:301:32: error: 'RNET_KEY_DISPLAY' was not declared in this scope
+rnet.cpp:320:21: error: 'RNET_KEY_INFO' was not declared in this scope
+rnet.cpp:324:21: error: 'RNET_KEY_STOP' was not declared in this scope
+rnet.cpp:327:21: error: 'RNET_KEY_UNO_PREVIOUS' was not declared in this scope
+rnet.cpp:330:21: error: '::PostMessage' has not been declared
+rnet.cpp:330:35: error: 'g_hMainWnd' was not declared in this scope
+rnet.cpp:330:47: error: 'WM_RNET_KEY' was not declared in this scope
+rnet.cpp:333:21: error: 'RNET_KEY_UNO_NEXT' was not declared in this scope
+rnet.cpp:336:21: error: '::PostMessage' has not been declared
+rnet.cpp: In member function 'void CRnetMonitor::SendRnet(const BYTE*, UINT)':
+rnet.cpp:369:11: error: name lookup of 'i' changed for ISO 'for' scoping [-fpermissive]
+rnet.cpp:369:11: note: (if you use '-fpermissive' G++ will accept your code)
+rnet.cpp:376:24: error: 'Write' was not declared in this scope
+rnet.cpp:379:26: error: 'HexDump' was not declared in this scope
+rnet.cpp: In member function 'void CRnetMonitor::DisplayMessage(const char*)':
+rnet.cpp:386:49: error: 'ZeroMemory' was not declared in this scope
+rnet.cpp:390:43: error: 'strncpy' was not declared in this scope
+rnet.cpp: In function 'void Init_Russound()':
+rnet.cpp:494:17: error: 'class CRnetMonitor' has no member named 'Start'
+rnet.cpp:494:31: error: 'CBR_19200' was not declared in this scope
+rnet.cpp:499:19: error: 'Sleep' was not declared in this scope

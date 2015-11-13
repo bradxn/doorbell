@@ -1,0 +1,8 @@
+zone3
+	source: 2
+	volume: 14
+	bass: 3
+	treble: 4
+	loudness: on
+	balance: 0
+	power: off
