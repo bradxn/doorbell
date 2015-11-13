@@ -1,3 +1,5 @@
+// This is code to talk to the Russound amplifiers
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <termios.h>

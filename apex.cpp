@@ -1,3 +1,5 @@
+// This code monitors the Apex secirity system events
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <termios.h>

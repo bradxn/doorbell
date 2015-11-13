@@ -1,3 +1,5 @@
+// This is the main doorbell program that waits for a button event and sounds the doorbell.
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
