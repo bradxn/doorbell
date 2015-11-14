@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the doorbell program
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/doorbell.sh
+
+[Install]
+WantedBy=multi-user.target
