@@ -136,7 +136,7 @@ UINT SsdpServerProc(LPVOID lpParam)
 	{
 		char buf [SSDP_BUFSIZE];
 
-		printf("Waiting for a packet...\n");
+//		printf("Waiting for a packet...\n");
 
 		struct sockaddr_in new_sock_addr;
 		socklen_t new_sock_addr_len = sizeof (new_sock_addr);
@@ -149,10 +149,7 @@ UINT SsdpServerProc(LPVOID lpParam)
 		}
 
 		buf[bytes] = '\0';
-		printf("Received from %s: %s\n", inet_ntoa(new_sock_addr.sin_addr), buf);
-
-//		CHttpRequest request;
-//		request.m_strAddress.Format("%d.%d.%d.%d", new_sock_addr.sin_addr.S_un.S_un_b.s_b1, new_sock_addr.sin_addr.S_un.S_un_b.s_b2, new_sock_addr.sin_addr.S_un.S_un_b.s_b3, new_sock_addr.sin_addr.S_un.S_un_b.s_b4);
+//		printf("Received from %s:\n%s\n", inet_ntoa(new_sock_addr.sin_addr), buf);
 
 		char* pch = buf;
 		while (*pch != '\0')
@@ -172,43 +169,20 @@ UINT SsdpServerProc(LPVOID lpParam)
 				if (*pch2 == '\n')
 					pch2 += 1;
 			}
-/*
-			// Handle line...
-			if (request.m_strRequestOrStatusLine.IsEmpty())
-			{
-				request.m_strRequestOrStatusLine = pch;
-			}
-			else
-			{
-				CString strLine(pch);
-				CString strName, strValue;
-
-				int nColonIndex = strLine.Find(':');
-				if (nColonIndex >= 0)
-				{
-					strName = strLine.Left(nColonIndex);
-					strName.TrimLeft();
-					strName.TrimRight();
-
-					strValue = strLine.Mid(nColonIndex + 1);
-					strValue.TrimLeft();
-					strValue.TrimRight();
-				}
-				else
-				{
-					strName = strLine;
-				}
-
-				request.m_headers[strName] = strValue;
-			}
-*/
+            
+            if (strncasecmp(pch, "NTS:", 4) == 0)
+            {
+                pch += 4;
+                while (*pch == ' ')
+                    pch += 1;
+                if (strcmp(pch, "doorbell:ring") == 0)
+                    printf("ding dong!\n");
+            }
 
 			pch = pch2;
 		}
 
-//		CHttpResponse response;
-//		pServer->HandleRequest(&request, &response);
-
+/*
 		char szResponse [] = 
 			"HTTP/1.1 200 OK\r\n"
 			"Date: \r\n"
@@ -221,6 +195,7 @@ UINT SsdpServerProc(LPVOID lpParam)
 			"\r\n";
 
 		sendto(sock, szResponse, strlen(szResponse), MSG_DONTROUTE, (struct sockaddr*)&new_sock_addr, sizeof (new_sock_addr));
+*/
 	}
 
 	return 0;
