@@ -1,11 +1,44 @@
 // ssdp.cpp : Defines the entry point for the console application.
 //
 
+
+#ifdef _WIN32
 #include "stdafx.h"
 #include <stdio.h>
+#else
+#include <string.h>
+#include <strings.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <errno.h>
+#define TCHAR char
+#define DWORD unsigned long
+#define WORD unsigned short
+#define ULONG unsigned long
+#define UINT unsigned int
+#define LPVOID void*
+#define BOOL bool
+#define TRUE true
+#define SOCKET int
+#define SOCKET_ERROR -1
+#define INVALID_SOCKET -1
+#define closesocket close
 
+#define WSAGetLastError() (errno)
+#define ZeroMemory(pb,cb) memset(pb, 0, cb)
+#endif
+
+#ifdef _WIN32
 TCHAR szLocalHost [256];
 DWORD ipLocalHost;
+#endif
 
 bool g_bNotifications = false;
 
@@ -38,7 +71,7 @@ UINT SsdpServerProc(LPVOID lpParam)
 	}
 
 	{
-		BOOL bTrue = TRUE;
+		int bTrue = 1;
 		if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&bTrue, sizeof (bTrue)) == SOCKET_ERROR)
 		{
 			fprintf(stderr, "Error %d setting reuse address flag\n", WSAGetLastError());
@@ -54,7 +87,7 @@ UINT SsdpServerProc(LPVOID lpParam)
 		sock_addr.sin_port = htons(SSDP_PORT);
 
 		// Binding the socket to the address
-		if (bind(sock, (LPSOCKADDR)&sock_addr, sizeof (sock_addr)) == SOCKET_ERROR)
+		if (bind(sock, (struct sockaddr*)&sock_addr, sizeof (sock_addr)) == SOCKET_ERROR)
 		{
 			fprintf(stderr, "Error %d binding the socket\n", WSAGetLastError());
 			return 1;
@@ -83,10 +116,12 @@ UINT SsdpServerProc(LPVOID lpParam)
 		}
 	}
 
+#ifdef _WIN32
 	{
 		DWORD bTrue = 1;
 		WSAIoctl(sock, SIO_MULTIPOINT_LOOPBACK, NULL, 0, &bTrue, sizeof (bTrue), NULL, NULL, NULL);
 	}
+#endif
 
 	{
 		char ttl = 4;
@@ -104,9 +139,9 @@ UINT SsdpServerProc(LPVOID lpParam)
 		printf("Waiting for a packet...\n");
 
 		struct sockaddr_in new_sock_addr;
-		int new_sock_addr_len = sizeof (new_sock_addr);
+		socklen_t new_sock_addr_len = sizeof (new_sock_addr);
 
-		int bytes = recvfrom(sock, buf, SSDP_BUFSIZE, 0, (LPSOCKADDR)&new_sock_addr, (int*)&new_sock_addr_len);
+		socklen_t bytes = recvfrom(sock, buf, SSDP_BUFSIZE, 0, (struct sockaddr*)&new_sock_addr, &new_sock_addr_len);
 		if (bytes == INVALID_SOCKET)
 		{
 			fprintf(stderr, "Error in receiving data - %d\n", WSAGetLastError());
@@ -185,7 +220,7 @@ UINT SsdpServerProc(LPVOID lpParam)
 			"USN: \r\n"
 			"\r\n";
 
-		sendto(sock, szResponse, strlen(szResponse), MSG_DONTROUTE, (LPSOCKADDR)&new_sock_addr, sizeof (new_sock_addr));
+		sendto(sock, szResponse, strlen(szResponse), MSG_DONTROUTE, (struct sockaddr*)&new_sock_addr, sizeof (new_sock_addr));
 	}
 
 	return 0;
@@ -225,15 +260,17 @@ static bool SsdpSend(char* pchPacket, int cchPacket)
 		dst_sock_addr.sin_addr.s_addr = inet_addr(SSDP_ADDRESS);
 		dst_sock_addr.sin_port = htons(SSDP_PORT);
 
+#ifdef _WIN32
 		DWORD addr = ipLocalHost;
 		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof (addr)) == SOCKET_ERROR)
 		{
 			fprintf(stderr, "Warning: Could not set IP_MULTICAST_IF - %d\n", WSAGetLastError());
 		}
+#endif
 
 //		for (int i = 0; i < 3; i += 1)
 		{
-			if (sendto(sock, pchPacket, cchPacket, MSG_DONTROUTE, (LPSOCKADDR)&dst_sock_addr, sizeof (dst_sock_addr)) == SOCKET_ERROR)
+			if (sendto(sock, pchPacket, cchPacket, MSG_DONTROUTE, (struct sockaddr*)&dst_sock_addr, sizeof (dst_sock_addr)) == SOCKET_ERROR)
 			{
 				fprintf(stderr, "Error in Sending data on the socket - %d\n", WSAGetLastError());
 			}
@@ -326,6 +363,7 @@ static bool SsdpAnnounce(const char* szType, const char* szName, const char* szL
 
 int main(int argc, char* argv[])
 {
+#ifdef _WIN32
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 	int err = WSAStartup(wVersionRequested, &wsaData);
@@ -347,6 +385,7 @@ int main(int argc, char* argv[])
 		char* addr0 = he->h_addr_list[0];
 		ipLocalHost = *(UINT*)addr0;
 	}
+#endif
 
 	while (argc > 1 && argv[1][0] == '-')
 	{
@@ -361,7 +400,7 @@ int main(int argc, char* argv[])
 
 	if (argc >= 3)
 	{
-		if (stricmp(argv[1], "notify") == 0)
+		if (strcasecmp(argv[1], "notify") == 0)
 		{
 			if (argc == 4)
 			{
