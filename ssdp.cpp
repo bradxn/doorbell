@@ -179,6 +179,15 @@ UINT SsdpServerProc(LPVOID lpParam)
                     printf("ding dong!\n");
             }
 
+            if (strncasecmp(pch, "NT:", 3) == 0)
+            {
+                pch += 3;
+                while (*pch == ' ')
+                    pch += 1;
+                if (strcmp(pch, "house:ring-doorbell") == 0)
+                    printf("ding dong!\n");
+            }
+
 			pch = pch2;
 		}
 
@@ -201,56 +210,86 @@ UINT SsdpServerProc(LPVOID lpParam)
 	return 0;
 }
 
-static bool SsdpSend(char* pchPacket, int cchPacket)
+SOCKET SsdpCreateSimpleSocket()
 {
 	SOCKET sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+	if (sock == INVALID_SOCKET)
+	{
+		fprintf(stderr, "Error creating the socket - %d\n", errno);
+		return INVALID_SOCKET;
+	}
+	
+	{
+		unsigned char ttl = 4;
+		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof (ttl)) == SOCKET_ERROR)
+		{
+			fprintf(stderr, "Warning: Could not set ttl - %d\n", errno);
+		}
+	}
+	
+	{
+		unsigned char bTrue = 1;
+		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &bTrue, sizeof (bTrue)) == SOCKET_ERROR)
+		{
+			fprintf(stderr, "Warning: Could not set loopback - %d\n", errno);
+		}
+	}
+	
+	return sock;
+}
+
+void SsdpInitAddr(struct sockaddr_in* paddr)
+{
+	bzero(paddr, sizeof (struct sockaddr_in));
+	paddr->sin_family = PF_INET;
+	paddr->sin_addr.s_addr = inet_addr(SSDP_ADDRESS);
+	paddr->sin_port = htons(SSDP_PORT);
+}
+
+static bool SsdpSend(char* pchPacket, int cchPacket)
+{
+	SOCKET sock = SsdpCreateSimpleSocket();
 	if (sock == SOCKET_ERROR)
 	{
 		fprintf(stderr, "Error creating the socket - %d\n", WSAGetLastError());
 		return false;
 	}
-
-	{
-		DWORD ttl = 4;
-		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&ttl, sizeof (ttl)) == SOCKET_ERROR)
-		{
-			fprintf(stderr, "Warning: Could not set ttl - %d\n", WSAGetLastError());
-		}
-	}
-
-///* This does nothing
-	{
-		DWORD bTrue = 1;
-		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, (char*)&bTrue, sizeof (bTrue)) == SOCKET_ERROR)
-		{
-			fprintf(stderr, "Warning: Could not set loopback - %d\n", WSAGetLastError());
-		}
-	}
-//*/
-
+    
+/*
+#ifndef _WIN32
+    {
+        struct sockaddr_in saddr;
+        ZeroMemory(&saddr, sizeof(saddr));
+        saddr.sin_family = AF_INET;
+        saddr.sin_port = htons(0);
+        saddr.sin_addr.s_addr = htonl(INADDR_ANY);
+        if (bind(sock, (struct sockaddr*)&saddr, sizeof(saddr)) < 0)
+            fprintf(stderr, "Bind failed %d\n", WSAGetLastError());
+    }
+#endif
+*/
+/*
+    {
+        DWORD addr = INADDR_ANY;//ipLocalHost;
+        if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof (addr)) == SOCKET_ERROR)
+        {
+            fprintf(stderr, "Warning: Could not set IP_MULTICAST_IF - %d\n", WSAGetLastError());
+        }
+    }
+*/
+    
 	{
 		struct sockaddr_in dst_sock_addr;
-		ZeroMemory(&dst_sock_addr, sizeof (dst_sock_addr));
-		dst_sock_addr.sin_family = AF_INET;
-		dst_sock_addr.sin_addr.s_addr = inet_addr(SSDP_ADDRESS);
-		dst_sock_addr.sin_port = htons(SSDP_PORT);
-
-#ifdef _WIN32
-		DWORD addr = ipLocalHost;
-		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof (addr)) == SOCKET_ERROR)
-		{
-			fprintf(stderr, "Warning: Could not set IP_MULTICAST_IF - %d\n", WSAGetLastError());
-		}
-#endif
+        SsdpInitAddr(&dst_sock_addr);
 
 //		for (int i = 0; i < 3; i += 1)
 		{
-			if (sendto(sock, pchPacket, cchPacket, MSG_DONTROUTE, (struct sockaddr*)&dst_sock_addr, sizeof (dst_sock_addr)) == SOCKET_ERROR)
+			if (sendto(sock, pchPacket, cchPacket, 0, (struct sockaddr*)&dst_sock_addr, sizeof (dst_sock_addr)) == SOCKET_ERROR)
 			{
 				fprintf(stderr, "Error in Sending data on the socket - %d\n", WSAGetLastError());
 			}
 
-///*
+/*
 			for (;;)
 			{
 				fd_set reading;
@@ -281,7 +320,7 @@ static bool SsdpSend(char* pchPacket, int cchPacket)
 					printf("recv'd: %s\n", buf);
 				}
 			}
-//*/
+*/
 		}
 	}
 
@@ -311,8 +350,9 @@ static bool SsdpNotify(const char* szType, const char* szSubType)
 	char buf [SSDP_BUFSIZE];
 	char* pch = buf + sprintf(buf, "NOTIFY * HTTP/1.1\r\n");
 	pch += sprintf(pch, "HOST: %s:%d\r\n", SSDP_ADDRESS, SSDP_PORT);
-	pch += sprintf(pch, "NTS: %s\r\n", szSubType);
 	pch += sprintf(pch, "NT: %s\r\n", szType);
+    if (szSubType != NULL)
+    	pch += sprintf(pch, "NTS: %s\r\n", szSubType);
 	pch += sprintf(pch, "\r\n");
 
 	return SsdpSend(buf, int(pch - buf));
@@ -377,10 +417,12 @@ int main(int argc, char* argv[])
 	{
 		if (strcasecmp(argv[1], "notify") == 0)
 		{
-			if (argc == 4)
-			{
-				SsdpNotify(argv[2], argv[3]);
-			}
+            const char* szNT = argv[2];
+            const char* szNTS = NULL;
+            if (argc == 4)
+                szNTS = argv[3];
+                
+			SsdpNotify(szNT, szNTS);
 		}
 	}
 	else if (argc == 2)
