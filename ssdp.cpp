@@ -176,7 +176,10 @@ UINT SsdpServerProc(LPVOID lpParam)
                 while (*pch == ' ')
                     pch += 1;
                 if (strcmp(pch, "doorbell:ring") == 0)
+                {
                     printf("ding dong!\n");
+                    system("mplayer /home/root/projects/rnet/Doorbell.m4a -ao alsa:device=hw=1.0");
+                }
             }
 
             if (strncasecmp(pch, "NT:", 3) == 0)
@@ -185,7 +188,10 @@ UINT SsdpServerProc(LPVOID lpParam)
                 while (*pch == ' ')
                     pch += 1;
                 if (strcmp(pch, "house:ring-doorbell") == 0)
+                {
                     printf("ding dong!\n");
+                    system("mplayer /home/root/projects/rnet/Doorbell.m4a -ao alsa:device=hw=1.0");
+                }
             }
 
 			pch = pch2;
