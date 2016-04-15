@@ -103,6 +103,9 @@ void DingDong()
 {
 	printf("Ding Dong!\n");
 	
+	system("DingDong.sh");
+	return;
+	
 	system("ssdp notify house:ring-doorbell");
 	
 	system("rnet /dev/ttyUSB0 savestate 1 rnet1.txt");
