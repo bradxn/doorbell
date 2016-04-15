@@ -103,7 +103,7 @@ void DingDong()
 {
 	printf("Ding Dong!\n");
 	
-	system("DingDong.sh");
+	system("./DingDong.sh");
 	return;
 	
 	system("ssdp notify house:ring-doorbell");
