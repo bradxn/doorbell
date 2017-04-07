@@ -1,0 +1,215 @@
+"stations":
+    [
+/*
+        {
+            "stream": "http://somafm.com/startstream=christmas.pls", 
+            "image": "http://somafm.com/img/SantaLounge.jpg",
+            "title": "Christmas Lounge"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=xmasrocks32.pls", 
+            "image": "http://somafm.com/img/xmasrocks120.png",
+            "title": "Christmas Rocks!"
+        },
+*/
+
+        {
+            "stream": "http://somafm.com/startstream=lush.pls", 
+            "image": "http://somafm.com/img/lush120.jpg",
+            "title": "Lush"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=groovesalad.pls", 
+            "image": "http://somafm.com/img/GrooveSaladBox.jpg",
+            "title": "Groove Salad"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=secretagent.pls", 
+            "image": "http://somafm.com/img/SecretAgentBox.jpg",
+            "title": "Secret Agent"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=illstreet48.pls", 
+            "image": "http://somafm.com/img/illstreet.jpg",
+            "title": "Illinois Street Lounge"
+        },
+
+        {
+            "stream": "http://somafm.com/seventies.pls", 
+            "image": "http://somafm.com/img/seventies400.jpg",
+            "title": "Left Coast 70s"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=u80s.pls", 
+            "image": "http://somafm.com/img/u80s-120.png",
+            "title": "Underground 80s"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=suburbsofgoa.pls", 
+            "image": "http://somafm.com/img/sog120.jpg",
+            "title": "Suburbs of Goa"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=events.pls", 
+            "image": "http://somafm.com/img/defcon120.png",
+            "title": "DEF CON Radio"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=thetrip.pls", 
+            "image": "http://somafm.com/img/thetrip120.jpg",
+            "title": "The Trip"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=dubstep.pls", 
+            "image": "http://somafm.com/img/dubstep120.png",
+            "title": "DubStep Beyond"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=missioncontrol.pls", 
+            "image": "http://somafm.com/img/missioncontrol120.jpg",
+            "title": "Mission Control"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=spacestation.pls", 
+            "image": "http://somafm.com/img/sss.jpg",
+            "title": "Space Station Soma"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=tags64.pls", 
+            "image": "http://somafm.com/img/tagstrancefract.jpg",
+            "title": "Tag's Trip"
+        },
+
+        {
+            "stream": "http://somafm.com/startstream=cliqhop.pls", 
+            "image": "http://somafm.com/img/cliqhop.gif",
+            "title": "cliqhop idm"
+        },
+
+        {
+            "stream": "http://somafm.com/deepspaceone.pls", 
+            "image": "http://somafm.com/img3/deepspaceone-400.jpg",
+            "title": "Deep Space One"
+        },
+
+        {
+            "stream": "http://somafm.com/dronezone.pls", 
+            "image": "http://somafm.com/img3/dronezone-400.jpg",
+            "title": "Drone Zone"
+        },
+
+        {
+            "stream": "http://somafm.com/fluid.pls", 
+            "image": "http://somafm.com/img3/fluid-400.jpg",
+            "title": "Fluid"
+        },
+
+        {
+            "stream": "http://somafm.com/7soul.pls", 
+            "image": "http://somafm.com/img3/7soul-400.jpg",
+            "title": "Seven Inch Soul"
+        },
+
+        {
+            "stream": "http://somafm.com/thistle.pls", 
+            "image": "http://somafm.com/img3/thistle-400.jpg",
+            "title": "ThistleRadio"
+        },
+
+        {
+            "stream": "http://somafm.com/folkfwd.pls", 
+            "image": "http://somafm.com/img3/folkfwd-400.jpg",
+            "title": "Folk Forward"
+        },
+
+        {
+            "stream": "http://somafm.com/bootliquor.pls", 
+            "image": "http://somafm.com/img3/bootliquor-400.jpg",
+            "title": "Boot Liquor"
+        },
+
+        {
+            "stream": "http://somafm.com/digitalis.pls", 
+            "image": "http://somafm.com/img3/digitalis-400.jpg",
+            "title": "Digitalis"
+        },
+
+        {
+            "stream": "http://somafm.com/poptron.pls", 
+            "image": "http://somafm.com/img3/poptron-400.jpg",
+            "title": "Poptron"
+        },
+
+        {
+            "stream": "http://somafm.com/indiepop.pls", 
+            "image": "http://somafm.com/img3/indiepop-400.jpg",
+            "title": "Indie Pop Rocks"
+        },
+
+        {
+            "stream": "http://somafm.com/bagel.pls", 
+            "image": "http://somafm.com/img3/bagel-400.jpg",
+            "title": "BAGeL Radio"
+        },
+
+        {
+            "stream": "http://somafm.com/metal.pls", 
+            "image": "http://somafm.com/img3/metal-400.png",
+            "title": "Metal Detector"
+        },
+
+        {
+            "stream": "http://somafm.com/sonicuniverse.pls", 
+            "image": "http://somafm.com/img3/sonicuniverse-400.jpg",
+            "title": "Sonic Universe"
+        },
+
+        {
+            "stream": "http://somafm.com/beatblender.pls", 
+            "image": "http://somafm.com/img3/beatblender-400.jpg",
+            "title": "Beat Blender"
+        },
+
+        {
+            "stream": "http://somafm.com/silent.pls", 
+            "image": "http://somafm.com/img3/silent180.png",
+            "title": "The Silent Channel"
+        },
+
+        {
+            "stream": "http://somafm.com/brfm.pls", 
+            "image": "http://somafm.com/img3/brfm-400.jpg",
+            "title": "Black Rock FM"
+        },
+
+        {
+            "stream": "http://somafm.com/earwaves.pls", 
+            "image": "http://somafm.com/img3/earwaves-400.jpg",
+            "title": "Earwaves"
+        },
+
+        {
+            "stream": "http://somafm.com/covers.pls", 
+            "image": "http://somafm.com/img3/covers-400.jpg",
+            "title": "Covers"
+        },
+
+        {
+            "stream": "http://somafm.com/doomed.pls", 
+            "image": "http://somafm.com/img3/doomed-400.jpg",
+            "title": "Doomed"
+        },
+    ]
+}
