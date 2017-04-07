@@ -1,0 +1,843 @@
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<style>
+body
+{
+	background-color: #000000;
+	color: #c0c0c0;
+	margin: 0;
+	padding: 0;
+}
+
+body
+{
+	background-color: #f0f0f0;
+	color: black;
+}
+
+.topbar
+{
+	position: fixed; top: 0; left: 0; right: 0; height: 100px;
+	background-color: rgba(255, 255, 255, .9);
+	color: black;
+}
+
+.content
+{
+	padding: 30px;
+	margin-top: 90px;
+}
+
+.nowplaying
+{
+	font: 14pt Tahoma;
+	foocolor: #e0e0e0;
+	color: #c0c0c0;
+}
+
+#nowplaying
+{
+	foocolor: #ffffff;
+	color: black;
+}
+</style>
+
+<script>
+
+var pl_cur_id = 0;
+
+function setclass( obj, value )
+{
+    obj.setAttribute( 'class', value ); /* Firefox */
+    obj.setAttribute( 'className', value ); /* IE */
+}
+
+function clear_children( elt )
+{
+    if (elt != null)
+	{
+        while (elt.hasChildNodes())
+            elt.removeChild(elt.firstChild);
+	}
+}
+
+function loadXMLDoc( url, callback )
+{
+  // branch for native XMLHttpRequest object
+  if ( window.XMLHttpRequest )
+  {
+    req = new XMLHttpRequest();
+    req.onreadystatechange = callback;
+    req.open( "GET", url, true );
+    req.send( null );
+  // branch for IE/Windows ActiveX version
+  }
+  else if ( window.ActiveXObject )
+  {
+    req = new ActiveXObject( "Microsoft.XMLHTTP" );
+    if ( req )
+    {
+      req.onreadystatechange = callback;
+      req.open( "GET", url, true );
+      req.send();
+    }
+  }
+}
+
+function addslashes( str )
+{
+	return str.replace(/\'/g, '\\\'');
+}
+
+function escapebackslashes( str )
+{
+	return str.replace(/\\/g, '\\\\');
+}
+
+function parse_status()
+{
+    if( req.readyState == 4 )
+    {
+        if( req.status == 200 )
+        {
+		}
+		else
+		{
+		}
+	}
+}
+
+function parse_playlist()
+{
+    if (req.readyState == 4)
+    {
+        if (req.status == 200)
+        {
+            var answer = req.responseXML.documentElement;
+            var playtree = document.getElementById('playtree');
+            var pos = document.createElement("div");
+            var pos_top = pos;
+            var elt = answer.firstChild;
+
+            pl_cur_id = 0;  /* changed to the current id if there actually is a current id */
+
+            while (elt != null)
+            {
+                if (elt.nodeName == "node")
+                {
+
+                    if( pos.hasChildNodes() )
+                        pos.appendChild( document.createElement( "br" ) );
+                    var nda = document.createElement( 'a' );
+                    nda.setAttribute( 'href', 'javascript:toggle_show_node(\''+elt.getAttribute( 'id' )+'\');' );
+                    var ndai = document.createElement( 'img' );
+                    ndai.setAttribute( 'src', 'images/minus.png' );
+                    ndai.setAttribute( 'alt', '[-]' );
+                    ndai.setAttribute( 'id', 'pl_img_'+elt.getAttribute( 'id' ) );
+                    nda.appendChild( ndai );
+                    pos.appendChild( nda );
+                    pos.appendChild( document.createTextNode( ' ' + elt.getAttribute( 'name' ) ) );
+
+                    if( elt.getAttribute( 'ro' ) == 'rw' )
+                    {
+                        pos.appendChild( document.createTextNode( ' ' ) );
+                        var del = document.createElement( "a" );
+                        del.setAttribute( 'href', 'javascript:pl_delete('+elt.getAttribute( 'id' )+')' );
+                            var delimg = document.createElement( "img" );
+                            delimg.setAttribute( 'src', 'images/delete_small.png' );
+                            delimg.setAttribute( 'alt', '(delete)' );
+                        del.appendChild( delimg );
+                        pos.appendChild( del );
+                    }
+
+                    var nd = document.createElement( "div" );
+                    setclass( nd, 'pl_node' );
+                    nd.setAttribute( 'id', 'pl_'+elt.getAttribute( 'id' ) );
+                    pos.appendChild( nd );
+
+                }
+                else if (elt.nodeName == "leaf")
+                {
+
+                    if( pos.hasChildNodes() )
+                    pos.appendChild( document.createElement( "br" ) );
+                    var pl = document.createElement( "a" );
+                    setclass( pl, 'pl_leaf' );
+                    pl.setAttribute( 'href', 'javascript:pl_play('+elt.getAttribute( 'id' )+');' );
+                    pl.setAttribute( 'id', 'pl_'+elt.getAttribute( 'id' ) );
+
+                    if( elt.getAttribute( 'current' ) == 'current' )
+                    {
+                        //pl.style.fontWeight = 'bold';
+                        var nowplaying = document.getElementById( 'nowplaying' );
+                        clear_children( nowplaying );
+                        nowplaying.appendChild( document.createTextNode( elt.getAttribute( 'name' ) ) );
+                        pl.appendChild( document.createTextNode( '* '));
+                        pl_cur_id = elt.getAttribute( 'id' );
+                    }
+
+                    pl.setAttribute( 'title', elt.getAttribute( 'uri' ));
+                    pl.appendChild( document.createTextNode( elt.getAttribute( 'name' ) ) );
+                    var duration = elt.getAttribute( 'duration' );
+                    if( duration > 0 )
+                        pl.appendChild( document.createTextNode( " (" + format_time( elt.getAttribute( 'duration' ) / 1000000 ) + ")" ) );
+                    pos.appendChild( pl );
+
+                    if( elt.getAttribute( 'ro' ) == 'rw' )
+                    {
+                        pos.appendChild( document.createTextNode( ' ' ) );
+                        var del = document.createElement( "a" );
+                        del.setAttribute( 'href', 'javascript:pl_delete('+elt.getAttribute( 'id' )+')' );
+                            var delimg = document.createElement( "img" );
+                            delimg.setAttribute( 'src', 'images/delete_small.png' );
+                            delimg.setAttribute( 'alt', '(delete)' );
+                        del.appendChild( delimg );
+                        pos.appendChild( del );
+                    }
+
+                }
+
+                if (elt.firstChild != null)
+                {
+                    elt = elt.firstChild;
+                    pos = pos.lastChild;
+                }
+                else if (elt.nextSibling != null)
+                {
+                    elt = elt.nextSibling;
+                    pos = pos;
+                }
+                else
+                {
+                    while (elt.parentNode.nextSibling == null)
+                    {
+                        elt = elt.parentNode;
+                        if (elt.parentNode == null)
+							break;
+                        pos = pos.parentNode;
+                    }
+
+                    if (elt.parentNode == null)
+						break;
+
+                    elt = elt.parentNode.nextSibling;
+                    pos = pos.parentNode;
+                }
+            }
+
+//            clear_children( playtree );
+//            playtree.appendChild( pos_top );
+        }
+        else
+        {
+            /*alert( 'Error! HTTP server replied: ' + req.status );*/
+        }
+    }
+}
+
+function update_playlist()
+{
+    loadXMLDoc( 'requests/playlist.xml', parse_playlist );
+}
+
+function in_play(input)
+{
+    loadXMLDoc( '/requests/status.xml?command=pl_stop', parse_status );
+    loadXMLDoc( '/requests/status.xml?command=pl_empty', parse_status );
+
+    var url = '/requests/status.xml?command=in_play&input='+encodeURIComponent( addslashes(escapebackslashes(input)) );
+    loadXMLDoc( url, parse_status );
+
+    setTimeout( 'update_playlist()', 1000 );
+}
+
+function in_enqueue(input)
+{
+    var url = '/requests/status.xml?command=in_enqueue&input='+encodeURIComponent( addslashes(escapebackslashes(input)) );
+    loadXMLDoc( url, parse_status );
+    setTimeout( 'update_playlist()', 1000 );
+}
+
+function pl_empty()
+{
+    loadXMLDoc( '/requests/status.xml?command=pl_empty', parse_status );
+    setTimeout( 'update_playlist()', 1000 );
+}
+
+function pl_pause()
+{
+    loadXMLDoc( '/requests/status.xml?command=pl_pause&id='+pl_cur_id, parse_status );
+}
+
+function pl_stop()
+{
+    loadXMLDoc( '/requests/status.xml?command=pl_stop', parse_status );
+    setTimeout( 'update_playlist()', 1000 );
+}
+
+function pl_next()
+{
+    loadXMLDoc( '/requests/status.xml?command=pl_next', parse_status );
+    setTimeout( 'update_playlist()', 1000 );
+}
+
+function pl_previous()
+{
+    loadXMLDoc( '/requests/status.xml?command=pl_previous', parse_status );
+    setTimeout( 'update_playlist()', 1000 );
+}
+
+
+/* *********************************************************** */
+
+
+var monthNames;
+var dayNames;
+
+function UpdateClock()
+{
+	var theDate = new Date();
+
+	clockDate.innerText = dayNames[theDate.getDay()] + ", " + monthNames[theDate.getMonth()] + " " + theDate.getDate();
+
+	var hour = theDate.getHours();
+	var minute = theDate.getMinutes();
+	var ampm = hour >= 12 ? "pm" : "am";
+
+	if (hour == 0)
+		hour = 12;
+	else if (hour > 12)
+		hour -= 12;
+
+	if (minute < 10)
+		minute = "0" + minute;
+
+	clockTime.innerText = hour + ":" + minute + " " + ampm;
+}
+
+function StartClock()
+{
+	monthNames = new Array();
+	monthNames[0] = "January";
+	monthNames[1] = "February";
+	monthNames[2] = "March";
+	monthNames[3] = "April";
+	monthNames[4] = "May";
+	monthNames[5] = "June";
+	monthNames[6] = "July";
+	monthNames[7] = "August";
+	monthNames[8] = "September";
+	monthNames[9] = "October";
+	monthNames[10] = "November";
+	monthNames[11] = "December";
+
+	dayNames = new Array();
+	dayNames[0] = "Sunday";
+	dayNames[1] = "Monday";
+	dayNames[2] = "Tuesday";
+	dayNames[3] = "Wednesday";
+	dayNames[4] = "Thursday";
+	dayNames[5] = "Friday";
+	dayNames[6] = "Saturday";
+
+	UpdateClock();
+	window.setInterval(UpdateClock, 500);
+}
+
+</script>
+
+<style>
+table.tile tr
+{
+	vertical-align: middle;
+}
+
+table.tile img
+{
+	width: 120px;
+	height: 120px;
+	margin-right: 24px;
+	cursor: hand;
+}
+
+table.tile td
+{
+	font: 18pt 'Segoe UI Light', 'Helvetica Neue';
+	font-weight: 100;
+	foocolor: #e0e0e0;
+	color: #404040;
+}
+
+div.about
+{
+	display: none;
+	font: 12pt 'Segoe UI', 'Helvetica Neue';
+	color: #909090;
+}
+
+div.player
+{
+	display: inline;
+	cursor: hand;
+	font: 36pt 'Segoe UI Light', 'Helvetica Neue';
+	font-weight: 100;
+}
+
+.player img
+{
+	width: 120px;
+	height: 120px;
+	margin: 2px;
+	border: 1px solid black;
+}
+
+.albums .player img
+{
+	width: 150px;
+	height: 150px;
+}
+
+
+#titleArea
+{
+	foobackground-color: rgba(0, 0, 0, .75);
+	foocolor: #e0e0e0;
+	fooborder-bottom: 1px solid steelblue;
+	margin-bottom: 10px;
+}
+
+#titleText
+{
+	font: 60px Arial; 
+	cursor: default;
+}
+
+#clockDate
+{
+	padding-right: 4px;
+	font: 20px 'Segoe UI Light', 'Helvetica Neue';
+	font-weight: 100;
+	cursor: default;
+}
+
+#clockTime
+{
+	padding-right: 4px;
+	font: 50px 'Segoe UI Light', 'Helvetica Neue';
+	font-weight: 100;
+	cursor: default;
+}
+</style>
+
+<body onload="StartClock();update_playlist()">
+
+<div class="topbar">
+<table id="titleArea" cellspacing="0" cellpadding="0" width="100%" style="cursor: arrow;">
+	<tr valign="bottom">
+		<td valign=middle>
+<div style="margin: 10px 10px;" class="nowplaying">NOW PLAYING <span id="nowplaying" style="font-weight: 100">&nbsp;</span></div>
+<div style="margin: 10px 10px;"><span onclick="pl_stop();" style="display: inline-block; font: 12pt 'Segoe UI', 'Helvetica Neue'; color: white; padding: 3pt 10pt; background-color: steelblue; cursor: hand; text-align: center;">&#x25a0;<br/>STOP</span></div>
+
+		</td>
+		<td id="theClock" width="250" align="right">
+			<div id="clockTime">&nbsp;</div>
+			<div id="clockDate">&nbsp;</div>
+		</td>
+	</tr>
+</table>
+</div>
+
+<div class="content">
+
+<div id="playtree">&nbsp;</div>
+
+
+<style>
+.test
+{
+	display: inline-block;
+	z-index: -1;
+	foobackground-color: #101010;
+	width: 350px;
+	height: 120px;
+	overflow: clip;
+	margin: 5px;
+	background-color: #f0f0f0;
+	color: #101010;
+}
+
+.test .tile
+{
+	position: relative;
+	left: 0;
+	top: 0;
+	width: 300px;
+	height: 120px;
+	margin: 5px;
+	padding-right: 10px;
+	overflow: clip;
+}
+
+.test img
+{
+	border: none;
+	float: left;
+	margin-right: 10px;
+	width: 120px;
+	height: 120px;
+}
+
+.test .name
+{
+	font: 18pt 'Segoe UI Light', 'Helvetica Neue';
+	font-weight: 100;
+	foocolor: #e0e0e0;
+	foocolor: #404040;
+}
+
+.test .desc
+{
+	font: 10pt 'Segoe UI Light', 'Helvetica Neue', sans-serif;
+	foocolor: #808080;
+	color: #000000;
+}
+</style>
+
+<!--
+<div style="background-color: #404040; vertical-align: top; margin-bottom: 50px; padding: 5px;">
+
+<div class="test">
+<div class="footile">
+<img onclick="in_play('http://somafm.com/startstream=christmas.pls');" src="http://somafm.com/img/SantaLounge.jpg" alt="Christmas Lounge"/>
+<div class="name">Christmas Lounge</div>
+<span class="desc">Chilled holiday grooves and classic winter lounge tracks. (Kid and Parent safe!)</span>
+</div>
+</div>
+
+
+<div class="test">
+<div class="footile">
+<img onclick="in_play('http://somafm.com/startstream=xmasrocks32.pls');" src="http://somafm.com/img/xmasrocks120.png" alt="Christmas Rocks!"/>
+<div class="name">Christmas Rocks!</div>
+<span class="desc">Have yourself an indie/alternative rock holiday season!</span>
+</div>
+</div>
+
+
+</div>
+<!-- -->
+
+
+<style>
+.newstation
+{
+	width: 135px;
+	height: 160px;
+	text-align: center;
+	foobackground-color: white;
+	padding: 15px 15px 0px 15px;
+	display: inline-block;
+}
+
+.newstation img
+{
+	width: 120px;
+	height: 120px;
+}
+
+.newtitle
+{
+	padding-top: 4px;
+	font: 12px 'Segoe UI Light', 'Helvetica Neue', sans-serif;
+	text-align: center;
+}
+</style>
+
+<div>
+<!--
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=christmas.pls');" src="http://somafm.com/img/SantaLounge.jpg"  /></div>
+<div class="newtitle">Christmas Lounge</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=xmasrocks32.pls');" src="http://somafm.com/img/xmasrocks120.png" /></div>
+<div class="newtitle">Christmas Rocks!</div>
+</div>
+-->
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=lush.pls');" src="http://somafm.com/img/lush120.jpg"/></div>
+<div class="newtitle">Lush</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=groovesalad.pls');" src="http://somafm.com/img/GrooveSaladBox.jpg"/></div>
+<div class="newtitle">Groove Salad</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=secretagent.pls');" src="http://somafm.com/img/SecretAgentBox.jpg"/></div>
+<div class="newtitle">Secret Agent</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=illstreet48.pls');" src="http://somafm.com/img/illstreet.jpg"/></div>
+<div class="newtitle">Illinois Street Lounge</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/seventies.pls');" src="http://somafm.com/img/seventies400.jpg" /></div>
+<div class="newtitle">Left Coast 70s</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=u80s.pls');" src="http://somafm.com/img/u80s-120.png" alt="Underground 80s"/></div>
+<div class="newtitle">Underground 80s</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=suburbsofgoa.pls');" src="http://somafm.com/img/sog120.jpg"/></div>
+<div class="newtitle">Suburbs of Goa</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=events.pls');" src="http://somafm.com/img/defcon120.png" alt="DEF CON Radio"/></div>
+<div class="newtitle">DEF CON Radio</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=thetrip.pls');" src="http://somafm.com/img/thetrip120.jpg" alt="The Trip"/></div>
+<div class="newtitle">The Trip</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=dubstep.pls');" src="http://somafm.com/img/dubstep120.png" alt="Dub Step Beyond"/></div>
+<div class="newtitle">DubStep Beyond</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=missioncontrol.pls');" src="http://somafm.com/img/missioncontrol120.jpg"/></div>
+<div class="newtitle">Mission Control</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=spacestation.pls');" src="http://somafm.com/img/sss.jpg"/></div>
+<div class="newtitle">Space Station Soma</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/startstream=tags64.pls');" src="http://somafm.com/img/tagstrancefract.jpg"/></div>
+<div class="newtitle">Tag's Trip</div>
+</div>
+
+<div class="newstation">
+<div><<img onclick="in_play('http://somafm.com/startstream=cliqhop.pls');" src="http://somafm.com/img/cliqhop.gif"/></div>
+<div class="newtitle">cliqhop idm</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/deepspaceone.pls');" src="http://somafm.com/img3/deepspaceone-400.jpg" /></div>
+<div class="newtitle">Deep Space One</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/dronezone.pls');" src="http://somafm.com/img3/dronezone-400.jpg" /></div>
+<div class="newtitle">Drone Zone</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/fluid.pls');" src="http://somafm.com/img3/fluid-400.jpg" /></div>
+<div class="newtitle">Fluid</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/7soul.pls');" src="http://somafm.com/img3/7soul-400.jpg" /></div>
+<div class="newtitle">Seven Inch Soul</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/thistle.pls');" src="http://somafm.com/img3/thistle-400.jpg" /></div>
+<div class="newtitle">ThistleRadio</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/folkfwd.pls');" src="http://somafm.com/img3/folkfwd-400.jpg" /></div>
+<div class="newtitle">Folk Forward</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/bootliquor.pls');" src="http://somafm.com/img3/bootliquor-400.jpg" /></div>
+<div class="newtitle">Boot Liquor</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/digitalis.pls');" src="http://somafm.com/img3/digitalis-400.jpg" /></div>
+<div class="newtitle">Digitalis</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/poptron.pls');" src="http://somafm.com/img3/poptron-400.jpg" /></div>
+<div class="newtitle">Poptron</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/indiepop.pls');" src="http://somafm.com/img3/indiepop-400.jpg" /></div>
+<div class="newtitle">Indie Pop Rocks</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/bagel.pls');" src="http://somafm.com/img3/bagel-400.jpg" /></div>
+<div class="newtitle">BAGeL Radio</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/metal.pls');" src="http://somafm.com/img3/metal-400.png" /></div>
+<div class="newtitle">Metal Detector</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/sonicuniverse.pls');" src="http://somafm.com/img3/sonicuniverse-400.jpg" /></div>
+<div class="newtitle">Sonic Universe</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/beatblender.pls');" src="http://somafm.com/img3/beatblender-400.jpg" /></div>
+<div class="newtitle">Beat Blender</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/silent.pls');" src="http://somafm.com/img3/silent180.png" /></div>
+<div class="newtitle">The Silent Channel</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/brfm.pls');" src="http://somafm.com/img3/brfm-400.jpg" /></div>
+<div class="newtitle">Black Rock FM</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/earwaves.pls');" src="http://somafm.com/img3/earwaves-400.jpg" /></div>
+<div class="newtitle">Earwaves</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/covers.pls');" src="http://somafm.com/img3/covers-400.jpg" /></div>
+<div class="newtitle">Covers</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://somafm.com/doomed.pls');" src="http://somafm.com/img3/doomed-400.jpg" /></div>
+<div class="newtitle">Doomed</div>
+</div>
+
+<!--
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/world.pls');" src="/skyfm/world.png" alt="World Music" /></div>
+<div class="newtitle">World Music</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/classical.pls');" src="/skyfm/classical.png" alt="Mostly Classical" /></div>
+<div class="newtitle">Mostly Classical</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/solopiano.pls');" src="/skyfm/solopiano.png" alt="Solo Piano" /></div>
+<div class="newtitle">Solo Piano</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/newage.pls');" src="/skyfm/newage.png" alt="New Age" /></div>
+<div class="newtitle">New Age</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/vocalnewage.pls');" src="/skyfm/vocalnewage.png" alt="Vocal New Age" /></div>
+<div class="newtitle">Vocal New Age</div>
+</div>
+-->
+
+<!--
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/relaxation.pls');" src="/skyfm/relaxation.png" alt="Relaxation" /></div>
+<div class="newtitle">Relaxation</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/dreamscapes.pls');" src="/skyfm/dreamscapes.png" alt="Dreamscapes" /></div>
+<div class="newtitle">Dreamscapes</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/the80s.pls');" src="/skyfm/the80s.png" alt="Best of the 80s" /></div>
+<div class="newtitle">Best of the 80's</div>
+</div>
+-->
+
+<div class="newstation">
+<div><img onclick="in_play('http://icy1.abacast.com:80/kplu-newsjazzaac-64');" src="kplu.png" /></div>
+<div class="newtitle">KPLU (NPR)</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://live-aacplus-64.kexp.org/kexp64.aac');" src="kexp.png" /></div>
+<div class="newtitle">KEXP</div>
+</div>
+
+<!--
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/rootsreggae.pls');" src="/skyfm/rootsreggae.png" alt="Roots Reggae" /></div>
+<div class="newtitle">Roots Reggae</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/datempolounge.pls');" src="/skyfm/datempolounge.png" alt="DaTempo Lounge" /></div>
+<div class="newtitle">DaTempo Lounge</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/modernblues.pls');" src="/skyfm/modernblues.png" alt="Modern Blues" /></div>
+<div class="newtitle">Modern Blues</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/salsa.pls');" src="/skyfm/salsa.png" alt="Salsa" /></div>
+<div class="newtitle">Salsa</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/guitar.pls');" src="/skyfm/guitar.png" alt="Classical Guitar" />></div>
+<div class="newtitle">Classical Guitar</div>
+</div>
+-->
+
+<!--
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/jazzclassics.pls');" src="/skyfm/jazzclassics.png" alt="Jazz Classics" /></div>
+<div class="newtitle">Jazz Classics</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/smoothjazz.pls');" src="/skyfm/smoothjazz.png" alt="Smooth Jazz" /></div>
+<div class="newtitle">Smooth Jaz</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/uptemposmoothjazz.pls');" src="/skyfm/uptemposmoothjazz.png" alt="Uptempo Smooth Jazz" /></div>
+<div class="newtitle">Uptempo Smooth Jazz</div>
+</div>
+
+<div class="newstation">
+<div><img onclick="in_play('http://www.sky.fm/aacplus/pianojazz.pls');" src="/skyfm/pianojazz.png" alt="Piano Jazz" /></div>
+<div class="newtitle">Piano Jazz</div>
+</div>
+-->
+
+</div>
+
+
+<p><a target="_blank" href="http://www.wunderground.com/US/WA/Woodinville.html?bannertypeclick=big2"><img src="http://weathersticker.wunderground.com/weathersticker/big2_cond/language/www/US/WA/Woodinville.gif" alt="Click for Woodinville, Washington Forecast" border="0" height="60" width="468" /></a></p>
+
+
+</div>
+</body>
