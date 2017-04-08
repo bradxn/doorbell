@@ -1,14 +1,9 @@
 #!/bin/bash
+#QUERY_STRING="loadlist http://somafm.com/startstream=groovesalad.pls"
+
 echo "Content-Type: text/plain"
 echo ""
-saveIFS=$IFS
-IFS='=&'
-parm=($QUERY_STRING)
-IFS=$saveIFS
-declare -A array
-for ((i=0; i<${#parm[@]}; i+=2))
-do
-    array[${parm[i]}]=${parm[i+1]}
-    echo ${parm[i+1]}
-done
+echo "${QUERY_STRING/\+/ }" > /tmp/mceiling
+echo "${QUERY_STRING/\+/ }" > /home/pi/foobar.txt
+echo "${QUERY_STRING/\+/ }"
 echo "OK"
