@@ -133,6 +133,8 @@ void DingDong()
 
 bool gpio_poll(int fd, bool bTimeout/*char* szValue, int nValueSize*/)
 {
+	lseek(fd, 0, SEEK_SET);
+
 	pollfd pfd;
 	pfd.fd = fd;
 	pfd.events = POLLPRI;
@@ -147,16 +149,36 @@ bool gpio_poll(int fd, bool bTimeout/*char* szValue, int nValueSize*/)
 	}
 //	else if (p > 0)
 //		printf("poll %d\n", p);
+
+	printf("p = %d revents = 0x%04x\n", p, pfd.revents);
 	
 	int nRead = 0;
-	if (p > 0 && (pfd.revents & POLLPRI) != 0)
+/*
+	if (p > 0 && (pfd.revents & POLLERR) != 0)
+	{
+		return false;
+	}
+*/
+	if (p > 0 /*&& (pfd.revents & POLLPRI) != 0*/)
 	{
 //		printf("reading...\n");
 		char szValue [32];
 		int nValueSize = sizeof(szValue);
 		nRead = read(fd, szValue, nValueSize);
 		if (nRead < 0)
+		{
+			printf("Read error %d\n", errno);
 			return false;
+		}
+		if (nRead > 0)
+		{
+			szValue[nRead] = '\0';
+			printf("Read: %d bytes: %s\n", nRead, szValue);
+		}
+		if (nRead == 0)
+		{
+			printf("EOF\n");
+		}
 //		printf("%d bytes\n", nRead);
 		
 		if (!bTimeout)
@@ -208,6 +230,17 @@ bool gpio_setdir(int nPin, const char* szDir)
 
 int main(int argc, const char* argv [])
 {
+	if (argc == 2)
+	{
+		g_nButtonPin = atoi(argv[1]);
+		printf("Listing on gpio %d\n", g_nButtonPin);
+	}
+	else
+	{
+		fprintf(stderr, "Usage: gpio <n>\n");
+		exit(1);
+	}
+
 	gpio_export(g_nButtonPin, true);
 	gpio_setdir(g_nButtonPin, "in");
 	gpio_set(g_nButtonPin, "edge", "rising");
