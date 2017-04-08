@@ -1,3 +1,4 @@
+
 // ssdp.cpp : Defines the entry point for the console application.
 //
 
@@ -169,7 +170,7 @@ UINT SsdpServerProc(LPVOID lpParam)
 				if (*pch2 == '\n')
 					pch2 += 1;
 			}
-            
+/*			
             if (strncasecmp(pch, "NTS:", 4) == 0)
             {
                 pch += 4;
@@ -181,7 +182,7 @@ UINT SsdpServerProc(LPVOID lpParam)
                     system("mplayer Doorbell.mp4a");
                 }
             }
-
+*/
             if (strncasecmp(pch, "NT:", 3) == 0)
             {
                 pch += 3;
@@ -191,6 +192,7 @@ UINT SsdpServerProc(LPVOID lpParam)
                 {
                     printf("ding dong!\n");
                     system("mplayer Doorbell.m4a");
+					break;
                 }
             }
 
