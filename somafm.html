@@ -236,11 +236,16 @@ function parse_playlist()
 
 function update_playlist()
 {
+/*
     loadXMLDoc( 'requests/playlist.xml', parse_playlist );
+*/
 }
 
 function in_play(input)
 {
+    loadXMLDoc( '/cgi-bin/mplayer.cgi?stop', parse_status );
+    loadXMLDoc( '/cgi-bin/mplayer.cgi?loadlist+'+input, parse_status );
+/*
     loadXMLDoc( '/requests/status.xml?command=pl_stop', parse_status );
     loadXMLDoc( '/requests/status.xml?command=pl_empty', parse_status );
 
@@ -248,6 +253,7 @@ function in_play(input)
     loadXMLDoc( url, parse_status );
 
     setTimeout( 'update_playlist()', 1000 );
+*/
 }
 
 function in_enqueue(input)
@@ -270,7 +276,10 @@ function pl_pause()
 
 function pl_stop()
 {
+    loadXMLDoc( '/cgi-bin/mplayer.cgi?stop', parse_status );
+/*
     loadXMLDoc( '/requests/status.xml?command=pl_stop', parse_status );
+*/
     setTimeout( 'update_playlist()', 1000 );
 }
 
