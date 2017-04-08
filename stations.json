@@ -211,5 +211,17 @@
             "image": "http://somafm.com/img3/doomed-400.jpg",
             "title": "Doomed"
         },
+
+        {
+            "stream": "http://icy1.abacast.com:80/kplu-newsjazzaac-64",
+            "image": "kplu.png",
+            "title": "KPLU (NPR)"
+        },
+
+        {
+            "stream": "http://live-aacplus-64.kexp.org/kexp64.aac",
+            "image": "kexp.png",
+            "title": "KEXP"
+        }
     ]
 }
