@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ./ssdp notify house:ring-doorbell
+exit
 
 rnet /dev/ttyUSB0 savestate 1 rnet1.txt
 rnet /dev/ttyUSB0 savestate 2 rnet2.txt
