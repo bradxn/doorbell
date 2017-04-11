@@ -1,0 +1,111 @@
+body
+{
+	background-color: #f0f0f0;
+	color: black;
+	margin: 0;
+	padding: 0;
+}
+
+.topbar
+{
+	position: fixed; top: 0; left: 0; right: 0; height: 100px;
+	background-color: rgba(255, 255, 255, .9);
+	color: black;
+}
+
+.content
+{
+	padding: 30px;
+	margin-top: 90px;
+    text-align: center;
+}
+
+.nowplaying
+{
+	font: 14pt Tahoma;
+	color: #c0c0c0;
+}
+
+#nowplaying
+{
+	color: black;
+}
+
+#titleArea
+{
+	margin-bottom: 10px;
+}
+
+#titleText
+{
+	font: 60px Arial; 
+	cursor: default;
+}
+
+#clockDate
+{
+	padding-right: 4px;
+	font: 20px 'Segoe UI Light', 'Helvetica Neue';
+	font-weight: 100;
+	cursor: default;
+}
+
+#clockTime
+{
+	padding-right: 4px;
+	font: 50px 'Segoe UI Light', 'Helvetica Neue';
+	font-weight: 100;
+	cursor: default;
+}
+
+
+.newstation
+{
+	width: 135px;
+	height: 160px;
+	text-align: center;
+	padding: 15px 15px 0px 15px;
+	display: inline-block;
+}
+
+.newstation img
+{
+	width: 120px;
+	height: 120px;
+}
+
+.newtitle
+{
+	padding-top: 4px;
+	font: 12px 'Segoe UI Light', 'Helvetica Neue', sans-serif;
+	text-align: center;
+}
+
+@media (max-width: 500px)
+{
+    .content
+    {
+        padding: 5px;
+    }
+
+    .newstation
+    {
+        width: 105px;
+        height: 130px;
+        text-align: center;
+        padding: 5px 5px 0px 5px;
+        display: inline-block;
+    }
+
+    .newstation img
+    {
+        width: 80px;
+        height: 80px;
+    }
+
+    #theClock, #wx
+    {
+        display: none;
+    }
+
+}
