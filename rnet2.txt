@@ -1,6 +1,6 @@
 zone2
-	source: 1
-	volume: 30
+	source: 2
+	volume: 50
 	bass: 3
 	treble: 4
 	loudness: off

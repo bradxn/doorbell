@@ -1,8 +1,8 @@
 zone3
 	source: 2
-	volume: 14
-	bass: 3
-	treble: 4
-	loudness: on
+	volume: 50
+	bass: 9
+	treble: 10
+	loudness: off
 	balance: 0
 	power: off

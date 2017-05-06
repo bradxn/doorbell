@@ -518,6 +518,7 @@ bool CRnetMonitor::Start(const char* szPort)
 	m_fd = open(szPort, O_RDWR | O_NOCTTY);
 	if (m_fd < 0)
 	{
+		printf("Can't open %s! (%d)\n", szPort, errno);
 		fprintf(stderr, "Can't open %s!\n", szPort);
 		return false;
 	}
@@ -590,15 +591,20 @@ void Rnet_SaveState(int nZone, const char* szFile)
 	g_russound.SendRnet(packet, 14);
 	
 	FILE* pFile = fopen(szFile, "w");
-	
-//	for (;;)
+
+	BYTE buf [256];
+	int ib = 0;	
+	for (;;)
 	{
-		BYTE buf [256];
-		int cb = read(g_russound.m_fd, buf, sizeof(buf));
-//		if (cb == 0)
-//			break;
-//		HexDump(buf, cb);
-		if (cb == 34 && buf[0] == 0xf0 && buf[1] == 0x00 && buf[2] == 0x00 && buf[3] == 0x70)
+		int cb = read(g_russound.m_fd, buf + ib, 34 - ib);
+		if (cb == 0)
+			break;
+
+printf("Dump %d\n", cb);
+		HexDump(buf + ib, cb);
+
+		ib += cb;
+		if (ib >= 34 && buf[0] == 0xf0 && buf[1] == 0x00 && buf[2] == 0x00 && buf[3] == 0x70)
 		{
 			int nController = buf[4];
 			int nZone = buf[12];
@@ -614,7 +620,13 @@ void Rnet_SaveState(int nZone, const char* szFile)
 			fprintf(pFile, "\tbalance: %d\n", int(buf[26]) - 10);
 			if (!buf[20])
 				fprintf(pFile, "\tpower: %s\n", buf[20] ? "on" : "off");
-//			break;
+			break;
+		}
+
+		if (ib >= 34)
+		{
+			printf("Unexpected packet!\n");
+			break;
 		}
 	}
 
@@ -698,6 +710,22 @@ void Rnet_LoadState(const char* szFile)
 	fclose(pFile);
 }
 
+void RunCmd(char* szLine)
+{
+    printf("RunCmd: %s\n", szLine);
+
+    int nZone, nSource;
+
+    if (sscanf(szLine, "on %d\n", &nZone) == 1 && nZone >= 1 && nZone <= 6)
+	    Rnet_ZoneOnOff(nZone - 1, true);
+    else if (sscanf(szLine, "off %d\n", &nZone) == 1 && nZone >= 1 && nZone <= 6)
+	    Rnet_ZoneOnOff(nZone - 1, false);
+    else if (sscanf(szLine, "source %d %d\n", &nZone, &nSource) == 2 && nZone >= 1 && nZone <= 6 && nSource >= 1 && nSource <= 6)
+	    Rnet_SetSource(nZone - 1, nSource - 1);
+    else
+        printf("unknown command\n");
+}
+
 int main(int argc, char* argv [])
 {
 	if (argc < 2)
@@ -713,12 +741,30 @@ int main(int argc, char* argv [])
 	     printf("\tmessage <message>\n");
 	     exit(0);
 	}
-	
+
 	const char* szPort = argv[1];
 	if (!g_russound.Start(szPort))
 		return 0;
 	
-	
+    if (argc == 4 && strcmp(argv[2], "-input") == 0)
+    {
+        for (;;)
+        {
+            FILE* pInputFile = fopen(argv[3], "r");
+            if (pInputFile == NULL)
+            {
+                fprintf(stderr, "Cannot open input file: %s\n", argv[3]);
+                exit(0);
+            }
+
+            char szLine [256];
+            while (fgets(szLine, sizeof(szLine), pInputFile) != NULL)
+            {
+                RunCmd(szLine);
+            }
+        }
+        exit(0);
+    }
 	if (argc > 2)
 	{
 		const char* szCmd = argv[2];
